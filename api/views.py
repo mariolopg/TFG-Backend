@@ -268,6 +268,8 @@ def get_hdd_specs(hdd):
     specs['name'] = hdd.find('h5', class_ = 'name').text
     size = hdd.find('span', class_ = 'size').text
     specs['size'] = re.findall('\d+', size )[0]
+    specs['bus'] = 'SATA'
+    specs['form_factor'] = '3.5'
 
     rpm = hdd.find('span', class_ = 'rpm').text
     if 'K' in rpm:
@@ -281,12 +283,16 @@ def get_hdd_specs(hdd):
 def get_ssd_specs(ssd):
     specs = {}
     specs['name'] = ssd.find('h5', class_ = 'name').text
+    print(specs['name'])
     size = ssd.find('span', class_ = 'size').text
     specs['size'] = re.findall('\d+', size )[0]
     specs['bus'] = ssd.find('span', class_ = 'bus').text
-    form_factor = ssd.findall(text = re.compile(r'[SATA|M.2]+ Format'))[0]
-    specs['format'] = form_factor
-    print(specs['name'])
+
+    form_factor = ssd.find(text = re.compile(r'[SATA|M.2] Format')).replace(' Format', '')
+    if form_factor == 'SATA':
+        form_factor = '2.5'
+    specs['form_factor'] = form_factor
+    
     return specs
 
 def get_psu_specs(psu):
@@ -360,5 +366,8 @@ def get_case_specs(case):
     specs['240_radiator_support'] = get_spec(case, '240mm Radiator Support', '0')
     specs['280_radiator_support'] = get_spec(case, '280mm Radiator Support', '0')
     specs['360_radiator_support'] = get_spec(case, '360mm Radiator Support', '0')
+
+    specs['2_5_disk_slot'] = get_spec(case, '2.5"', '0')
+    specs['3_5_disk_slot'] = get_spec(case, '3.5"', '0')
     print(specs['name'])
     return specs
