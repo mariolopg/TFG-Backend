@@ -19,5 +19,5 @@ from api.views import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/scrap/<component>', ApiRoot)
+    path('api/scrap/<component>', Scrap)
 ]
