@@ -33,6 +33,12 @@ def get_spec(specs, spec_to_find, alternative = ''):
 
     return spec
 
+def save_serializer(serializer):
+    if serializer.is_valid():
+        serializer.save()
+    else:
+        print(serializer.errors)
+
 def scrap_cpus():
     cpus = []
     hardware_list = get_hardware_list('https://www.pc-kombo.com/us/components/cpus')
@@ -41,8 +47,7 @@ def scrap_cpus():
         if not CPU.objects.filter(name = (item.find('h5', class_ = 'name').text)):
             cpu = get_cpu_specs(item)
             serializer = CPUSerializer(data = cpu)
-            if serializer.is_valid():
-                serializer.save()
+            save_serializer(serializer)
             cpus.append(cpu)
             
     return cpus
@@ -60,8 +65,7 @@ def scrap_motherboards():
                 motherboard = BeautifulSoup(r.content, 'html.parser')
                 motherboard = get_motherboard_specs(motherboard)
                 serializer = MotherboardSerializer(data = motherboard)
-                if serializer.is_valid():
-                    serializer.save()
+                save_serializer(serializer)
                 motherboards.append(motherboard)
 
             r.close()
@@ -73,20 +77,22 @@ def scrap_gpus():
     hardware_list = get_hardware_list('https://www.pc-kombo.com/us/components/gpus')
 
     for item in hardware_list:
-        # * Cuando haya DB comprobar si existe el nombre ---- 'True' => Skip | 'False' => Scrap
         gpu_url = item.find_all('a')[0]['href']
-        r = requests.get(gpu_url)
 
-        if r.ok:
-            gpu = BeautifulSoup(r.content, 'html.parser')
-            series = item.find('span', class_ = 'series').text
-            gpu = get_gpu_specs(gpu)
-            gpu['series'] = series
-            gpus.append(gpu)
+        if not GPU.objects.filter(name = (item.find('h5', class_ = 'name').text)):
+            r = requests.get(gpu_url)
+            if r.ok:
+                gpu = BeautifulSoup(r.content, 'html.parser')
+                series = item.find('span', class_ = 'series').text
+                GPUSeries.objects.get_or_create(id=series)
+                gpu = get_gpu_specs(gpu)
+                gpu['series'] = series
+                serializer = GPUSerializer(data=gpu)
+                save_serializer(serializer)
+                gpus.append(gpu)
 
-        r.close()
+            r.close()
 
-    save_json('gpus', gpus)    
     return gpus
 
 def scrap_rams():
@@ -97,8 +103,7 @@ def scrap_rams():
         if not RAM.objects.filter(name = (item.find('h5', class_ = 'name').text)):
             ram = get_ram_specs(item)
             serializer = RAMSerializer(data = ram)
-            if serializer.is_valid():
-                serializer.save()
+            save_serializer(serializer)
             rams.append(ram)
 
     return rams
@@ -228,8 +233,8 @@ def get_gpu_specs(gpu):
     specs['vram'] = re.findall('\d+', get_spec(gpu, 'Vram', '8'))[0]
     specs['tdp'] = re.findall('\d+', get_spec(gpu, 'TDP', '100'))[0]
     specs['length'] = re.findall('\d+', get_spec(gpu, 'Length'))[0]
-    specs['8_pin_connectors'] = get_spec(gpu, '8-pin connectors', '0')
-    specs['6_pin_connectors'] = get_spec(gpu, '6-pin connectors', '0')
+    specs['eight_pin_connectors'] = get_spec(gpu, '8-pin connectors', '0')
+    specs['six_pin_connectors'] = get_spec(gpu, '6-pin connectors', '0')
 
     print(specs['name'])
     return specs

@@ -15,3 +15,13 @@ class RAMSerializer(serializers.ModelSerializer):
     class Meta:
         model = RAM
         fields = ['name', 'type', 'size', 'mhz', 'units']
+
+class GPUSeriesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GPUSeries
+        fields = ['id']
+
+class GPUSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GPU
+        fields = ['name', 'series', 'vram', 'tdp', 'length', 'eight_pin_connectors', 'six_pin_connectors']
