@@ -43,3 +43,17 @@ class Motherboard(models.Model):
  
     def __str__(self):
         return f"Motherboard: {self.name}"
+    
+class RAM(models.Model):
+    id = models.AutoField(primary_key = True)
+    name = models.CharField(blank = False, unique=True, max_length=100)
+    type = models.CharField(blank = False, max_length=10)
+    size = models.IntegerField(validators=[MinValueValidator(1)])
+    mhz = models.IntegerField(validators=[MinValueValidator(1)])
+    units = models.IntegerField(validators=[MinValueValidator(1)])
+
+    class Meta:
+        ordering = ['name']
+ 
+    def __str__(self):
+        return f"CPU: {self.name}"

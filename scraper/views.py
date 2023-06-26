@@ -60,15 +60,12 @@ def scrap_motherboards():
                 motherboard = BeautifulSoup(r.content, 'html.parser')
                 motherboard = get_motherboard_specs(motherboard)
                 serializer = MotherboardSerializer(data = motherboard)
-
                 if serializer.is_valid():
                     serializer.save()
-
                 motherboards.append(motherboard)
 
             r.close()
 
-    save_json('motherboards', motherboards)
     return motherboards
 
 def scrap_gpus():
@@ -97,11 +94,13 @@ def scrap_rams():
     hardware_list = get_hardware_list('https://www.pc-kombo.com/us/components/rams')
 
     for item in hardware_list:
-        # * Cuando haya DB comprobar si existe el nombre ---- 'True' => Skip | 'False' => Scrap
-        ram = get_ram_specs(item)
-        rams.append(ram)
+        if not RAM.objects.filter(name = (item.find('h5', class_ = 'name').text)):
+            ram = get_ram_specs(item)
+            serializer = RAMSerializer(data = ram)
+            if serializer.is_valid():
+                serializer.save()
+            rams.append(ram)
 
-    save_json('rams', rams)
     return rams
 
 def scrap_hdds():
@@ -238,10 +237,10 @@ def get_gpu_specs(gpu):
 def get_ram_specs(ram):
     specs = {}
     specs['name'] = ram.find('h5', class_ = 'name').text
-    size = ram.find('span', class_ = 'size').text
-    specs['size'] = re.findall('\d+', size )[0]
     type_mhz = ram.find('span', class_ = 'type').text.split('-')
     specs['type'] = type_mhz[0]
+    size = ram.find('span', class_ = 'size').text
+    specs['size'] = re.findall('\d+', size )[0]
     specs['mhz'] = type_mhz[1]
     kit = ram.find(text = re.compile(r'Kit of \d+'))
     specs['units'] = re.findall('\d+', kit )[0]
