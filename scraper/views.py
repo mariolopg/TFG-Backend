@@ -4,11 +4,11 @@ import json
 import re
 import os
 
-from .models import CPU
-from .serializers import CPUSerializer
+from .models import *
+from .serializers import *
 
 def get_hardware_list(url):
-    r = requests.get(url)
+    r = requests.get(url, stream = True)
     hardware_list = []
 
     if r.ok:
@@ -44,8 +44,7 @@ def scrap_cpus():
             if serializer.is_valid():
                 serializer.save()
             cpus.append(cpu)
-
-    save_json('cpus', cpus)
+            
     return cpus
 
 def scrap_motherboards():
@@ -53,16 +52,21 @@ def scrap_motherboards():
     hardware_list = get_hardware_list('https://www.pc-kombo.com/us/components/motherboards')
 
     for item in hardware_list:
-        # * Cuando haya DB comprobar si existe el nombre ---- 'True' => Skip | 'False' => Scrap
         motherboard_url = item.find_all('a')[0]['href']
-        r = requests.get(motherboard_url)
 
-        if r.ok:
-            motherboard = BeautifulSoup(r.content, 'html.parser')
-            motherboard = get_motherboard_specs(motherboard)
-            motherboards.append(motherboard)
+        if not Motherboard.objects.filter(name = (item.find('h5', class_ = 'name').text)):
+            r = requests.get(motherboard_url, stream = True)
+            if r.ok:
+                motherboard = BeautifulSoup(r.content, 'html.parser')
+                motherboard = get_motherboard_specs(motherboard)
+                serializer = MotherboardSerializer(data = motherboard)
 
-        r.close()
+                if serializer.is_valid():
+                    serializer.save()
+
+                motherboards.append(motherboard)
+
+            r.close()
 
     save_json('motherboards', motherboards)
     return motherboards
@@ -131,7 +135,7 @@ def scrap_psus():
     for item in hardware_list:
         # * Cuando haya DB comprobar si existe el nombre ---- 'True' => Skip | 'False' => Scrap
         psu_url = item.find_all('a')[0]['href']
-        r = requests.get(psu_url)
+        r = requests.get(psu_url, stream = True)
 
         if r.ok:
             psu = BeautifulSoup(r.content, 'html.parser')
@@ -151,7 +155,7 @@ def scrap_coolers():
     for item in hardware_list:
         # * Cuando haya DB comprobar si existe el nombre ---- 'True' => Skip | 'False' => Scrap
         cooler_url = item.find_all('a')[0]['href']
-        r = requests.get(cooler_url)
+        r = requests.get(cooler_url, stream = True)
 
         if r.ok:
             cooler = BeautifulSoup(r.content, 'html.parser')
@@ -175,7 +179,7 @@ def scrap_cases():
     for item in hardware_list:
         # * Cuando haya DB comprobar si existe el nombre ---- 'True' => Skip | 'False' => Scrap
         case_url = item.find_all('a')[0]['href']
-        r = requests.get(case_url)
+        r = requests.get(case_url, stream = True)
 
         if r.ok:
             case = BeautifulSoup(r.content, 'html.parser')
@@ -202,7 +206,11 @@ def get_motherboard_specs(motherboard):
     specs = {}
 
     specs['name'] = motherboard.find('h1', itemprop = 'name').text
-    specs['form_factor'] = get_spec(motherboard, 'Form Factor', 'ATX')
+    specs['form_factor'] = get_spec(motherboard, 'Form Factor')
+
+    if specs['form_factor'] == 'ITX':
+        specs['form_factor'] = 'Mini-ITX'
+
     specs['socket'] = get_spec(motherboard, 'Socket')
     specs['chipset'] = get_spec(motherboard, 'Chipset')
     specs['memory_type'] = get_spec(motherboard, 'Memory Type')
@@ -212,6 +220,7 @@ def get_motherboard_specs(motherboard):
     specs['m2_3_slots'] = get_spec(motherboard, 'M.2 (PCI-E 3.0)', '0')
     specs['m2_4_slots'] = get_spec(motherboard, 'M.2 (PCI-E 4.0)', '0')
 
+    print(specs['name'])
     return specs
 
 def get_gpu_specs(gpu):
@@ -298,7 +307,6 @@ def get_air_cooler_specs(cooler):
     specs['type'] = 'air'
     height = get_spec(cooler, 'Height')
     specs['height'] = re.findall('\d+', height )[0]
-
     return specs
 
 def get_liquid_cooler_specs(cooler):

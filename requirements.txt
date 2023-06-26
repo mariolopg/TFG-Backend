@@ -3,3 +3,4 @@ djangorestframework
 psycopg2>=2.8
 requests
 beautifulsoup4
+django-enumchoicefield
