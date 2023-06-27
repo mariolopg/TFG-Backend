@@ -2,11 +2,35 @@ from enum import Enum
 from django.db import models
 from django.core.validators import *
 # Create your models here.
-
+    
+class Socket(models.Model):
+    id = models.CharField(primary_key = True, max_length=50)
+    class Meta:
+        ordering = ['id']
+ 
+    def __str__(self):
+        return self
+    
+class Chipset(models.Model):
+    id = models.CharField(primary_key = True, max_length=50)
+    class Meta:
+        ordering = ['id']
+ 
+    def __str__(self):
+        return self
+    
+class RAMType(models.Model):
+    id = models.CharField(primary_key = True, max_length=50)
+    class Meta:
+        ordering = ['id']
+ 
+    def __str__(self):
+        return self
+    
 class CPU(models.Model):
     id = models.AutoField(primary_key = True)
     name = models.CharField(blank = False, unique=True, max_length=100)
-    socket = models.CharField(blank = False, max_length=100)
+    socket = models.ForeignKey('Socket', on_delete=models.CASCADE)
     cores = models.IntegerField(validators=[MinValueValidator(1)])
     threads = models.IntegerField(validators=[MinValueValidator(1)])
 
@@ -28,9 +52,9 @@ class Motherboard(models.Model):
     id = models.AutoField(primary_key = True)
     name = models.CharField(blank = False, unique=True, max_length=100)
     form_factor = models.CharField(blank = False, max_length=10, choices = FORM_FACTOR_CHOICES)
-    socket = models.CharField(blank = False, max_length=100)
-    chipset = models.CharField(blank = False, max_length=100)
-    memory_type = models.CharField(blank = False, max_length=100)
+    socket = models.ForeignKey('Socket', on_delete=models.CASCADE)
+    chipset = models.ForeignKey('Chipset', on_delete=models.CASCADE)
+    memory_type = models.ForeignKey('RAMType', on_delete=models.CASCADE)
     ram_capacity = models.IntegerField(validators=[MinValueValidator(1)])
     ram_slots = models.IntegerField(validators=[MinValueValidator(1)])
     sata_slots = models.IntegerField(validators=[MinValueValidator(0)])
@@ -46,7 +70,7 @@ class Motherboard(models.Model):
 class RAM(models.Model):
     id = models.AutoField(primary_key = True)
     name = models.CharField(blank = False, unique=True, max_length=100)
-    type = models.CharField(blank = False, max_length=10)
+    type = models.ForeignKey('RAMType', on_delete=models.CASCADE)
     size = models.IntegerField(validators=[MinValueValidator(1)])
     mhz = models.IntegerField(validators=[MinValueValidator(1)])
     units = models.IntegerField(validators=[MinValueValidator(1)])
@@ -80,3 +104,27 @@ class GPU(models.Model):
  
     def __str__(self):
         return self
+    
+class PSUEfficiency(models.Model):
+    id = models.CharField(primary_key = True, max_length=50)
+    class Meta:
+        ordering = ['id']
+ 
+    def __str__(self):
+        return self
+    
+class PSU(models.Model):
+
+    FORM_FACTOR_CHOICES =(
+        ('ATX', 'ATX'),
+        ('TFX', 'TFX'),
+        ('SFX', 'SFX'),
+    )
+
+    id = models.AutoField(primary_key = True)
+    name = models.CharField(blank = False, unique=True, max_length=100)
+    watts = models.IntegerField(validators=[MinValueValidator(1)])
+    form_factor = models.CharField(blank = False, max_length=10, choices = FORM_FACTOR_CHOICES)
+    efficiency = models.ForeignKey('PSUEfficiency', on_delete=models.CASCADE)
+    eight_pcie_connectors = models.IntegerField(validators=[MinValueValidator(0)])
+    six_pcie_connectors = models.IntegerField(validators=[MinValueValidator(0)])

@@ -25,3 +25,8 @@ class GPUSerializer(serializers.ModelSerializer):
     class Meta:
         model = GPU
         fields = ['name', 'series', 'vram', 'tdp', 'length', 'eight_pin_connectors', 'six_pin_connectors']
+
+class PSUSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PSU
+        fields = ['name', 'watts', 'form_factor', 'efficiency', 'eight_pcie_connectors', 'six_pcie_connectors']

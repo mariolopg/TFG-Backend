@@ -46,6 +46,7 @@ def scrap_cpus():
     for item in hardware_list:
         if not CPU.objects.filter(name = (item.find('h5', class_ = 'name').text)):
             cpu = get_cpu_specs(item)
+            Socket.objects.get_or_create(id=cpu['socket'])
             serializer = CPUSerializer(data = cpu)
             save_serializer(serializer)
             cpus.append(cpu)
@@ -64,6 +65,9 @@ def scrap_motherboards():
             if r.ok:
                 motherboard = BeautifulSoup(r.content, 'html.parser')
                 motherboard = get_motherboard_specs(motherboard)
+                Socket.objects.get_or_create(id=motherboard['socket'])
+                Chipset.objects.get_or_create(id=motherboard['chipset'])
+                RAMType.objects.get_or_create(id=motherboard['memory_type'])
                 serializer = MotherboardSerializer(data = motherboard)
                 save_serializer(serializer)
                 motherboards.append(motherboard)
@@ -102,6 +106,7 @@ def scrap_rams():
     for item in hardware_list:
         if not RAM.objects.filter(name = (item.find('h5', class_ = 'name').text)):
             ram = get_ram_specs(item)
+            RAMType.objects.get_or_create(id=ram['type'])
             serializer = RAMSerializer(data = ram)
             save_serializer(serializer)
             rams.append(ram)
@@ -137,19 +142,19 @@ def scrap_psus():
     hardware_list = get_hardware_list('https://www.pc-kombo.com/us/components/psus')
 
     for item in hardware_list:
-        # * Cuando haya DB comprobar si existe el nombre ---- 'True' => Skip | 'False' => Scrap
         psu_url = item.find_all('a')[0]['href']
-        r = requests.get(psu_url, stream = True)
 
-        if r.ok:
-            psu = BeautifulSoup(r.content, 'html.parser')
-            psu = get_psu_specs(psu)
-            if not(re.findall(r'[\bextern|\bredundant|\bmisc|\bitx]', psu['size']) or psu['size'] == ''):
+        if not PSU.objects.filter(name = (item.find('h5', class_ = 'name').text)):
+            r = requests.get(psu_url, stream = True)
+            if r.ok:
+                psu = BeautifulSoup(r.content, 'html.parser')
+                psu = get_psu_specs(psu)
+                PSUEfficiency.objects.get_or_create(id=psu['efficiency'])
+                serializer = PSUSerializer(data=psu)
+                save_serializer(serializer)
                 psus.append(psu)
-
-        r.close()
-
-    save_json('psus', psus)    
+            r.close()
+             
     return psus
 
 def scrap_coolers():
@@ -289,10 +294,10 @@ def get_psu_specs(psu):
     specs = {}
     specs['name'] = psu.find('h1', itemprop = 'name').text
     specs['watts'] = get_spec(psu, 'Watt')
-    specs['size'] = get_spec(psu, 'Size')
+    specs['form_factor'] = get_spec(psu, 'Size')
     specs['efficiency'] = get_spec(psu, 'Efficiency Rating')
-    specs['8_cpie_cables'] = get_spec(psu, 'PCI-E cables 8-pin', '0')
-    specs['6_cpie_cables'] = get_spec(psu, 'PCI-E cables 6-pin', '0')
+    specs['eight_pcie_connectors'] = get_spec(psu, 'PCI-E cables 8-pin', '0')
+    specs['six_pcie_connectors'] = get_spec(psu, 'PCI-E cables 6-pin', '0')
     print(specs['name'])
     return specs
 
