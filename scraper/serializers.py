@@ -30,3 +30,13 @@ class PSUSerializer(serializers.ModelSerializer):
     class Meta:
         model = PSU
         fields = ['name', 'watts', 'form_factor', 'efficiency', 'eight_pcie_connectors', 'six_pcie_connectors']
+
+class HDDSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HDD
+        fields = ['name', 'size', 'form_factor', 'bus', 'rpm']
+
+class SSDSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SSD
+        fields = ['name', 'size', 'form_factor', 'bus']

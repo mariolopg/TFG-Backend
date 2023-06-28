@@ -128,3 +128,44 @@ class PSU(models.Model):
     efficiency = models.ForeignKey('PSUEfficiency', on_delete=models.CASCADE)
     eight_pcie_connectors = models.IntegerField(validators=[MinValueValidator(0)])
     six_pcie_connectors = models.IntegerField(validators=[MinValueValidator(0)])
+
+    class Meta:
+        ordering = ['id']
+ 
+    def __str__(self):
+        return self
+
+class StorageDrive(models.Model):
+
+    FORM_FACTOR_CHOICES =(
+        ('2.5', '2.5'),
+        ('3.5', '3.5'),
+        ('M.2', 'M.2'),
+    )
+
+    id = models.AutoField(primary_key = True)
+    name = models.CharField(blank = False, max_length=100)
+    size = models.IntegerField(validators=[MinValueValidator(1)])
+    form_factor = models.CharField(blank = False, max_length=10, choices = FORM_FACTOR_CHOICES)
+    bus = models.CharField(blank = False, max_length=100)
+
+    class Meta:
+        abstract = True
+        unique_together = ['name', 'size', 'form_factor']
+
+class HDD(StorageDrive):
+    rpm = models.IntegerField(validators=[MinValueValidator(1)])
+
+    class Meta:
+        ordering = ['id']
+ 
+    def __str__(self):
+        return self
+
+class SSD(StorageDrive):
+    class Meta:
+        ordering = ['id']
+ 
+    def __str__(self):
+        return self
+ 

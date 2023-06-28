@@ -37,6 +37,7 @@ def save_serializer(serializer):
     if serializer.is_valid():
         serializer.save()
     else:
+        print(serializer)
         print(serializer.errors)
 
 def scrap_cpus():
@@ -46,7 +47,6 @@ def scrap_cpus():
     for item in hardware_list:
         if not CPU.objects.filter(name = (item.find('h5', class_ = 'name').text)):
             cpu = get_cpu_specs(item)
-            Socket.objects.get_or_create(id=cpu['socket'])
             serializer = CPUSerializer(data = cpu)
             save_serializer(serializer)
             cpus.append(cpu)
@@ -106,7 +106,6 @@ def scrap_rams():
     for item in hardware_list:
         if not RAM.objects.filter(name = (item.find('h5', class_ = 'name').text)):
             ram = get_ram_specs(item)
-            RAMType.objects.get_or_create(id=ram['type'])
             serializer = RAMSerializer(data = ram)
             save_serializer(serializer)
             rams.append(ram)
@@ -118,11 +117,12 @@ def scrap_hdds():
     hardware_list = get_hardware_list('https://www.pc-kombo.com/us/components/hdds')
 
     for item in hardware_list:
-        # * Cuando haya DB comprobar si existe el nombre ---- 'True' => Skip | 'False' => Scrap
-        hdd = get_hdd_specs(item)
-        hdds.append(hdd)
+        if not HDD.objects.filter(name = (item.find('h5', class_ = 'name').text)):
+            hdd = get_hdd_specs(item)
+            serializer = HDDSerializer(data=hdd)
+            save_serializer(serializer)
+            hdds.append(hdd)
 
-    save_json('hdds', hdds)
     return hdds
 
 def scrap_ssds():
@@ -130,9 +130,11 @@ def scrap_ssds():
     hardware_list = get_hardware_list('https://www.pc-kombo.com/us/components/ssds')
 
     for item in hardware_list:
-        # * Cuando haya DB comprobar si existe el nombre ---- 'True' => Skip | 'False' => Scrap
-        ssd = get_ssd_specs(item)
-        ssds.append(ssd)
+        if not SSD.objects.filter(name = (item.find('h5', class_ = 'name').text)):
+            ssd = get_ssd_specs(item)
+            serializer = SSDSerializer(data=ssd)
+            save_serializer(serializer)
+            ssds.append(ssd)
 
     save_json('ssds', ssds)
     return ssds
