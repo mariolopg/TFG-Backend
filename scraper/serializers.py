@@ -24,12 +24,12 @@ class GPUSeriesSerializer(serializers.ModelSerializer):
 class GPUSerializer(serializers.ModelSerializer):
     class Meta:
         model = GPU
-        fields = ['name', 'series', 'vram', 'tdp', 'length', 'eight_pin_connectors', 'six_pin_connectors']
+        fields = ['name', 'series', 'vram', 'tdp', 'length', '_8_pin_connectors', '_6_pin_connectors']
 
 class PSUSerializer(serializers.ModelSerializer):
     class Meta:
         model = PSU
-        fields = ['name', 'watts', 'form_factor', 'efficiency', 'eight_pcie_connectors', 'six_pcie_connectors']
+        fields = ['name', 'watts', 'form_factor', 'efficiency', '_8_pcie_connectors', '_6_pcie_connectors']
 
 class HDDSerializer(serializers.ModelSerializer):
     class Meta:
@@ -40,3 +40,13 @@ class SSDSerializer(serializers.ModelSerializer):
     class Meta:
         model = SSD
         fields = ['name', 'size', 'form_factor', 'bus']
+
+class AirCoolerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AirCooler
+        fields = ['name', 'supported_sockets', 'height']
+
+class LiquidCoolerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LiquidCooler
+        fields = ['name', 'supported_sockets', 'radiator', '_80_mm_fans', '_92_mm_fans', '_120_mm_fans', '_140_mm_fans', '_200_mm_fans']

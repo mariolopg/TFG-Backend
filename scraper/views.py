@@ -40,6 +40,11 @@ def save_serializer(serializer):
         print(serializer)
         print(serializer.errors)
 
+def add_sockets(sockets):
+    for socket in sockets:
+        if not Socket.objects.filter(id=socket):
+            Socket.objects.create(id=socket)
+
 def scrap_cpus():
     cpus = []
     hardware_list = get_hardware_list('https://www.pc-kombo.com/us/components/cpus')
@@ -136,7 +141,6 @@ def scrap_ssds():
             save_serializer(serializer)
             ssds.append(ssd)
 
-    save_json('ssds', ssds)
     return ssds
 
 def scrap_psus():
@@ -164,23 +168,24 @@ def scrap_coolers():
     hardware_list = get_hardware_list('https://www.pc-kombo.com/us/components/cpucoolers')
 
     for item in hardware_list:
-        # * Cuando haya DB comprobar si existe el nombre ---- 'True' => Skip | 'False' => Scrap
         cooler_url = item.find_all('a')[0]['href']
-        r = requests.get(cooler_url, stream = True)
+        name = (item.find('h5', class_ = 'name').text)
 
+        r = requests.get(cooler_url, stream = True)
         if r.ok:
             cooler = BeautifulSoup(r.content, 'html.parser')
-
             if item.find('span', class_ = 'radiator'):
                 cooler = get_liquid_cooler_specs(cooler)
+                serializer = LiquidCoolerSerializer(data=cooler)
             else:
                 cooler = get_air_cooler_specs(cooler)
+                serializer = AirCoolerSerializer(data=cooler)
 
+            add_sockets(cooler['supported_sockets'])
+            save_serializer(serializer)
             coolers.append(cooler)
-
         r.close()
 
-    save_json('coolers', coolers)  
     return coolers
 
 def scrap_cases():
@@ -240,8 +245,8 @@ def get_gpu_specs(gpu):
     specs['vram'] = re.findall('\d+', get_spec(gpu, 'Vram', '8'))[0]
     specs['tdp'] = re.findall('\d+', get_spec(gpu, 'TDP', '100'))[0]
     specs['length'] = re.findall('\d+', get_spec(gpu, 'Length'))[0]
-    specs['eight_pin_connectors'] = get_spec(gpu, '8-pin connectors', '0')
-    specs['six_pin_connectors'] = get_spec(gpu, '6-pin connectors', '0')
+    specs['_8_pin_connectors'] = get_spec(gpu, '8-pin connectors', '0')
+    specs['_6_pin_connectors'] = get_spec(gpu, '6-pin connectors', '0')
 
     print(specs['name'])
     return specs
@@ -298,15 +303,15 @@ def get_psu_specs(psu):
     specs['watts'] = get_spec(psu, 'Watt')
     specs['form_factor'] = get_spec(psu, 'Size')
     specs['efficiency'] = get_spec(psu, 'Efficiency Rating')
-    specs['eight_pcie_connectors'] = get_spec(psu, 'PCI-E cables 8-pin', '0')
-    specs['six_pcie_connectors'] = get_spec(psu, 'PCI-E cables 6-pin', '0')
+    specs['_8_pcie_connectors'] = get_spec(psu, 'PCI-E cables 8-pin', '0')
+    specs['_6_pcie_connectors'] = get_spec(psu, 'PCI-E cables 6-pin', '0')
     print(specs['name'])
     return specs
 
 def get_cooler_specs(cooler):
     specs = {}
     specs['name'] = cooler.find('h1', itemprop = 'name').text
-    specs['supported_sockets'] = get_spec(cooler, 'Supported Sockets').split(', ')
+    specs['supported_sockets'] = get_spec(cooler, 'Supported Sockets').replace(' ', '').split(',')
     print(specs['name'])
     return specs
 
@@ -315,7 +320,6 @@ def get_air_cooler_specs(cooler):
     cooler_common_specs = get_cooler_specs(cooler)
     specs['name'] = cooler_common_specs['name']
     specs['supported_sockets'] = cooler_common_specs['supported_sockets']
-    specs['type'] = 'air'
     height = get_spec(cooler, 'Height')
     specs['height'] = re.findall('\d+', height )[0]
     return specs
@@ -325,14 +329,13 @@ def get_liquid_cooler_specs(cooler):
     cooler_common_specs = get_cooler_specs(cooler)
     specs['name'] = cooler_common_specs['name']
     specs['supported_sockets'] = cooler_common_specs['supported_sockets']
-    specs['type'] = 'liquid'
     radiator = get_spec(cooler, 'Radiator')
     specs['radiator'] = re.findall('\d+', radiator )[0]
-    specs['80_mm_fans'] = get_spec(cooler, '80mm Fans', '0')
-    specs['92_mm_fans'] = get_spec(cooler, '92mm Fans', '0')
-    specs['120_mm_fans'] = get_spec(cooler, '120mm Fans', '0')
-    specs['140_mm_fans'] = get_spec(cooler, '140mm Fans', '0')
-    specs['200_mm_fans'] = get_spec(cooler, '200mm Fans', '0')
+    specs['_80_mm_fans'] = get_spec(cooler, '80mm Fans', '0')
+    specs['_92_mm_fans'] = get_spec(cooler, '92mm Fans', '0')
+    specs['_120_mm_fans'] = get_spec(cooler, '120mm Fans', '0')
+    specs['_140_mm_fans'] = get_spec(cooler, '140mm Fans', '0')
+    specs['_200_mm_fans'] = get_spec(cooler, '200mm Fans', '0')
 
     return specs
 
@@ -357,13 +360,13 @@ def get_case_specs(case):
     air_cooler_height = get_spec(case, 'Supported GPU length')
     specs['air_cooler_height'] = re.findall('\d+', air_cooler_height )[0]
 
-    specs['120_radiator_support'] = get_spec(case, '120mm Radiator Support', '0')
-    specs['140_radiator_support'] = get_spec(case, '140mm Radiator Support', '0')
-    specs['240_radiator_support'] = get_spec(case, '240mm Radiator Support', '0')
-    specs['280_radiator_support'] = get_spec(case, '280mm Radiator Support', '0')
-    specs['360_radiator_support'] = get_spec(case, '360mm Radiator Support', '0')
+    specs['_120_radiator_support'] = get_spec(case, '120mm Radiator Support', '0')
+    specs['_140_radiator_support'] = get_spec(case, '140mm Radiator Support', '0')
+    specs['_240_radiator_support'] = get_spec(case, '240mm Radiator Support', '0')
+    specs['_280_radiator_support'] = get_spec(case, '280mm Radiator Support', '0')
+    specs['_360_radiator_support'] = get_spec(case, '360mm Radiator Support', '0')
 
-    specs['2_5_disk_slot'] = get_spec(case, '2.5"', '0')
-    specs['3_5_disk_slot'] = get_spec(case, '3.5"', '0')
+    specs['_2_5_disk_slot'] = get_spec(case, '2.5"', '0')
+    specs['_3_5_disk_slot'] = get_spec(case, '3.5"', '0')
     print(specs['name'])
     return specs

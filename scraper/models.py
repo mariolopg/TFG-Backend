@@ -96,8 +96,8 @@ class GPU(models.Model):
     vram = models.IntegerField(validators=[MinValueValidator(1)])
     tdp = models.IntegerField(validators=[MinValueValidator(1)])
     length = models.IntegerField(validators=[MinValueValidator(1)])
-    eight_pin_connectors = models.IntegerField(validators=[MinValueValidator(0)])
-    six_pin_connectors = models.IntegerField(validators=[MinValueValidator(0)])
+    _8_pin_connectors = models.IntegerField(validators=[MinValueValidator(0)])
+    _6_pin_connectors = models.IntegerField(validators=[MinValueValidator(0)])
 
     class Meta:
         ordering = ['name']
@@ -126,8 +126,8 @@ class PSU(models.Model):
     watts = models.IntegerField(validators=[MinValueValidator(1)])
     form_factor = models.CharField(blank = False, max_length=10, choices = FORM_FACTOR_CHOICES)
     efficiency = models.ForeignKey('PSUEfficiency', on_delete=models.CASCADE)
-    eight_pcie_connectors = models.IntegerField(validators=[MinValueValidator(0)])
-    six_pcie_connectors = models.IntegerField(validators=[MinValueValidator(0)])
+    _8_pcie_connectors = models.IntegerField(validators=[MinValueValidator(0)])
+    _6_pcie_connectors = models.IntegerField(validators=[MinValueValidator(0)])
 
     class Meta:
         ordering = ['id']
@@ -165,6 +165,39 @@ class HDD(StorageDrive):
 class SSD(StorageDrive):
     class Meta:
         ordering = ['id']
+ 
+    def __str__(self):
+        return self
+    
+class Cooler(models.Model):
+
+    id = models.AutoField(primary_key = True)
+    name = models.CharField(blank = False, max_length=200)
+    supported_sockets = models.ManyToManyField(Socket)
+
+    class Meta:
+        abstract = True
+
+class AirCooler(Cooler):
+    height = models.IntegerField(validators=[MinValueValidator(1)])
+
+    class Meta:
+        ordering = ['id']
+        unique_together = ['name', 'height']
+ 
+    def __str__(self):
+        return self
+
+class LiquidCooler(Cooler):
+    radiator = models.IntegerField(validators=[MinValueValidator(1)])
+    _80_mm_fans = models.IntegerField(validators=[MinValueValidator(0)])
+    _92_mm_fans = models.IntegerField(validators=[MinValueValidator(0)])
+    _120_mm_fans = models.IntegerField(validators=[MinValueValidator(0)])
+    _140_mm_fans = models.IntegerField(validators=[MinValueValidator(0)])
+    _200_mm_fans = models.IntegerField(validators=[MinValueValidator(0)])
+    class Meta:
+        ordering = ['id']
+        unique_together = ['name', 'radiator']
  
     def __str__(self):
         return self
