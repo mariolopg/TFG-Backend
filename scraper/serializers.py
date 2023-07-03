@@ -50,3 +50,8 @@ class LiquidCoolerSerializer(serializers.ModelSerializer):
     class Meta:
         model = LiquidCooler
         fields = ['name', 'supported_sockets', 'radiator', '_80_mm_fans', '_92_mm_fans', '_120_mm_fans', '_140_mm_fans', '_200_mm_fans']
+
+class CaseSerializeer(serializers.ModelSerializer):
+    class Meta:
+        model = Case
+        fields = ['name', 'motherboard_size', 'psu_size', 'gpu_length', 'air_cooler_height', '_120_radiator_support', '_140_radiator_support', '_240_radiator_support', '_280_radiator_support', '_360_radiator_support', '_2_5_disk_slot', '_3_5_disk_slot']

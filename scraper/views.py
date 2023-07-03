@@ -169,7 +169,6 @@ def scrap_coolers():
 
     for item in hardware_list:
         cooler_url = item.find_all('a')[0]['href']
-        name = (item.find('h5', class_ = 'name').text)
 
         r = requests.get(cooler_url, stream = True)
         if r.ok:
@@ -193,16 +192,18 @@ def scrap_cases():
     hardware_list = get_hardware_list('https://www.pc-kombo.com/us/components/cases')
 
     for item in hardware_list:
-        # * Cuando haya DB comprobar si existe el nombre ---- 'True' => Skip | 'False' => Scrap
-        case_url = item.find_all('a')[0]['href']
-        r = requests.get(case_url, stream = True)
+        if not Case.objects.filter(name = (item.find('h5', class_ = 'name').text)):
+            case_url = item.find_all('a')[0]['href']
+            r = requests.get(case_url, stream = True)
 
-        if r.ok:
-            case = BeautifulSoup(r.content, 'html.parser')
-            case = get_case_specs(case)
-            cases.append(case)
+            if r.ok:
+                case = BeautifulSoup(r.content, 'html.parser')
+                case = get_case_specs(case)
+                serializer = CaseSerializeer(data=case)
+                save_serializer(serializer)
+                cases.append(case)
 
-        r.close()
+            r.close()
 
     save_json('cases', cases)    
     return cases

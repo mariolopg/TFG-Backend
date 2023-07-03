@@ -201,4 +201,25 @@ class LiquidCooler(Cooler):
  
     def __str__(self):
         return self
+    
+class Case(models.Model):
+    id = models.AutoField(primary_key = True)
+    name = models.CharField(blank = False, unique=True, max_length=100)
+    motherboard_size = models.CharField(blank = False, max_length=10, choices=Motherboard.FORM_FACTOR_CHOICES)
+    psu_size = models.CharField(blank = False, max_length=10, choices=PSU.FORM_FACTOR_CHOICES)
+    gpu_length = models.IntegerField(validators=[MinValueValidator(1)])
+    air_cooler_height = models.IntegerField(validators=[MinValueValidator(1)])
+    _120_radiator_support = models.IntegerField(validators=[MinValueValidator(0)])
+    _140_radiator_support = models.IntegerField(validators=[MinValueValidator(0)])
+    _240_radiator_support = models.IntegerField(validators=[MinValueValidator(0)])
+    _280_radiator_support = models.IntegerField(validators=[MinValueValidator(0)])
+    _360_radiator_support = models.IntegerField(validators=[MinValueValidator(0)])
+    _2_5_disk_slot = models.IntegerField(validators=[MinValueValidator(0)])
+    _3_5_disk_slot = models.IntegerField(validators=[MinValueValidator(0)])
+
+    class Meta:
+        ordering = ['name']
+ 
+    def __str__(self):
+        return self
  
