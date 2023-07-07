@@ -1,0 +1,13 @@
+SHELL=/bin/bash
+BASH_ENV=/container.env
+
+HOME=/app
+PYTHONIOENCODING=UTF-8
+
+FD1=/proc/1/fd/1
+FD2=/proc/1/fd/2
+FLOCK="/usr/bin/flock -w 0"
+
+30 3 * * *  $FLOCK /tmp/auto_scrap.lock python manage.py runcrons "scraper.cron.AutoScrap" >$FD1 2>$FD2 
+
+# No borrar esta linea / Do not delete this line

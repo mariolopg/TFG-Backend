@@ -1,8 +1,9 @@
 # MacOS
-/.DS_Store
-/.vscode
+.DS_Store/
+.DS_Store
+.vscode/
 
 # Python
-/__pycache__
+__pycache__/
 data/
 dumps/

@@ -37,7 +37,6 @@ def save_serializer(serializer):
     if serializer.is_valid():
         serializer.save()
     else:
-        print(serializer)
         print(serializer.errors)
 
 def add_sockets(sockets):
@@ -55,7 +54,7 @@ def scrap_cpus():
             serializer = CPUSerializer(data = cpu)
             save_serializer(serializer)
             cpus.append(cpu)
-            
+                   
     return cpus
 
 def scrap_motherboards():
@@ -204,8 +203,7 @@ def scrap_cases():
                 cases.append(case)
 
             r.close()
-
-    save_json('cases', cases)    
+  
     return cases
 
 def get_cpu_specs(cpu):

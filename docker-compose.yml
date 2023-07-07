@@ -8,7 +8,7 @@ services:
       - ./data/db:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=api
-      - POSTGRES_USER=admin
+      - POSTGRES_USER=root
       - POSTGRES_PASSWORD=admin
     ports:
       - "5432:5432"
@@ -21,7 +21,19 @@ services:
       - "8000:8000"
     environment:
       - POSTGRES_NAME=api
-      - POSTGRES_USER=admin
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=admin
+    depends_on:
+      - db
+
+  crontab:
+    build: .
+    command: cron -f && service cron start
+    volumes:
+      - .:/app
+    environment:
+      - POSTGRES_NAME=api
+      - POSTGRES_USER=root
       - POSTGRES_PASSWORD=admin
     depends_on:
       - db

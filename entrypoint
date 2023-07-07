@@ -1,0 +1,11 @@
+#!/bin/bash
+
+declare -p | grep -Ev 'BASHOPTS|BASH_VERSINFO|EUID|PPID|SHELLOPTS|UID' >/container.env
+/usr/bin/crontab /crontab.txt
+
+if [ -n "$0" ] ; then
+  exec "$@"
+fi
+
+echo "*** Launching cron daemon"
+exec cron -f -L 3
