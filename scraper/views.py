@@ -60,7 +60,6 @@ def scrap_cpus():
                 cpus.append(cpu)
             r.close()
     
-    save_json('cpus', cpus)
     return cpus
 
 def scrap_motherboards():
