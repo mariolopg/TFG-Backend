@@ -50,11 +50,17 @@ def scrap_cpus():
 
     for item in hardware_list:
         if not CPU.objects.filter(name = (item.find('h5', class_ = 'name').text)):
-            cpu = get_cpu_specs(item)
-            serializer = CPUSerializer(data = cpu)
-            save_serializer(serializer)
-            cpus.append(cpu)
-                   
+            cpu_url = item.find_all('a')[0]['href']
+            r = requests.get(cpu_url, stream = True)
+            if r.ok:
+                cpu = BeautifulSoup(r.content, 'html.parser')
+                cpu = get_cpu_specs(cpu)
+                serializer = CPUSerializer(data = cpu)
+                save_serializer(serializer)
+                cpus.append(cpu)
+            r.close()
+    
+    save_json('cpus', cpus)
     return cpus
 
 def scrap_motherboards():
@@ -62,9 +68,8 @@ def scrap_motherboards():
     hardware_list = get_hardware_list('https://www.pc-kombo.com/us/components/motherboards')
 
     for item in hardware_list:
-        motherboard_url = item.find_all('a')[0]['href']
-
         if not Motherboard.objects.filter(name = (item.find('h5', class_ = 'name').text)):
+            motherboard_url = item.find_all('a')[0]['href']
             r = requests.get(motherboard_url, stream = True)
             if r.ok:
                 motherboard = BeautifulSoup(r.content, 'html.parser')
@@ -85,9 +90,8 @@ def scrap_gpus():
     hardware_list = get_hardware_list('https://www.pc-kombo.com/us/components/gpus')
 
     for item in hardware_list:
-        gpu_url = item.find_all('a')[0]['href']
-
         if not GPU.objects.filter(name = (item.find('h5', class_ = 'name').text)):
+            gpu_url = item.find_all('a')[0]['href']
             r = requests.get(gpu_url)
             if r.ok:
                 gpu = BeautifulSoup(r.content, 'html.parser')
@@ -147,9 +151,8 @@ def scrap_psus():
     hardware_list = get_hardware_list('https://www.pc-kombo.com/us/components/psus')
 
     for item in hardware_list:
-        psu_url = item.find_all('a')[0]['href']
-
         if not PSU.objects.filter(name = (item.find('h5', class_ = 'name').text)):
+            psu_url = item.find_all('a')[0]['href']
             r = requests.get(psu_url, stream = True)
             if r.ok:
                 psu = BeautifulSoup(r.content, 'html.parser')
@@ -208,11 +211,11 @@ def scrap_cases():
 
 def get_cpu_specs(cpu):
     specs = {}
-    specs['name'] = cpu.find('h5', class_ = 'name').text
-    specs['socket'] = cpu.find('span', class_ = 'socket').text
-    specs['cores'] = cpu.find('span', class_ = 'cores').text
-    threads = cpu.find(text = re.compile(r'\d+ Threads'))
-    specs['threads'] = re.findall('\d+', threads )[0]
+    specs['name'] = cpu.find('h1', itemprop = 'name').text
+    specs['socket'] = get_spec(cpu, 'Socket')
+    specs['cores'] = get_spec(cpu, 'Cores')
+    specs['threads'] = get_spec(cpu, 'Threads')
+    specs['integrated_graphics'] = True if not cpu.find('i', class_ = 'icon icon-stop') else False
 
     print(specs['name'])
     return specs

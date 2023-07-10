@@ -32,6 +32,7 @@ class CPU(models.Model):
     socket = models.ForeignKey('Socket', on_delete=models.CASCADE)
     cores = models.IntegerField(validators=[MinValueValidator(1)])
     threads = models.IntegerField(validators=[MinValueValidator(1)])
+    integrated_graphics = models.BooleanField(null=False)
 
     class Meta:
         ordering = ['name']
