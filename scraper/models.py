@@ -8,7 +8,7 @@ class Socket(models.Model):
         ordering = ['id']
  
     def __str__(self):
-        return self
+        return self.id
     
 class Chipset(models.Model):
     id = models.CharField(primary_key = True, max_length=50)
@@ -205,6 +205,9 @@ class LiquidCooler(Cooler):
 class Case(models.Model):
     id = models.AutoField(primary_key = True)
     name = models.CharField(blank = False, unique=True, max_length=100)
+    width = models.IntegerField(validators=[MinValueValidator(1)])
+    depth = models.IntegerField(validators=[MinValueValidator(1)])
+    height = models.IntegerField(validators=[MinValueValidator(1)])
     motherboard_size = models.CharField(blank = False, max_length=10, choices=Motherboard.FORM_FACTOR_CHOICES)
     psu_size = models.CharField(blank = False, max_length=10, choices=PSU.FORM_FACTOR_CHOICES)
     gpu_length = models.IntegerField(validators=[MinValueValidator(1)])
@@ -219,6 +222,27 @@ class Case(models.Model):
 
     class Meta:
         ordering = ['name']
+ 
+    def __str__(self):
+        return self
+    
+class Build(models.Model):
+    id = models.AutoField(primary_key = True)
+    name = models.CharField(blank = False, max_length=100)
+    description = models.CharField(blank = False, max_length=10000)
+    cpu = models.ForeignKey('CPU', on_delete=models.CASCADE)
+    motherboard = models.ForeignKey('Motherboard', on_delete=models.CASCADE)
+    air_cooler = models.ForeignKey('AirCooler', null=True, on_delete=models.CASCADE)
+    liquid_cooler = models.ForeignKey('LiquidCooler', null=True, on_delete=models.CASCADE)
+    ram = models.ForeignKey('RAM', on_delete=models.CASCADE)
+    gpu = models.ForeignKey('GPU', null=True, on_delete=models.CASCADE)
+    hdd = models.ForeignKey('HDD', null=True, on_delete=models.CASCADE)
+    ssd = models.ForeignKey('SSD', null=True, on_delete=models.CASCADE)
+    case = models.ForeignKey('Case', on_delete=models.CASCADE)
+    psu = models.ForeignKey('PSU', on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ['id']
  
     def __str__(self):
         return self

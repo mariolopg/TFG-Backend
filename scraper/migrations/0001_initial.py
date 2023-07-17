@@ -18,6 +18,9 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(primary_key=True, serialize=False)),
                 ('name', models.CharField(max_length=100, unique=True)),
+                ('width', models.IntegerField(validators=[django.core.validators.MinValueValidator(1)])),
+                ('depth', models.IntegerField(validators=[django.core.validators.MinValueValidator(1)])),
+                ('height', models.IntegerField(validators=[django.core.validators.MinValueValidator(1)])),
                 ('motherboard_size', models.CharField(choices=[('E-ATX', 'E-ATX'), ('ATX', 'ATX'), ('Micro-ATX', 'Micro-ATX'), ('Mini-ITX', 'Mini-ITX')], max_length=10)),
                 ('psu_size', models.CharField(choices=[('ATX', 'ATX'), ('TFX', 'TFX'), ('SFX', 'SFX')], max_length=10)),
                 ('gpu_length', models.IntegerField(validators=[django.core.validators.MinValueValidator(1)])),
