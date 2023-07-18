@@ -205,7 +205,7 @@ def scrap_cases():
             if r.ok:
                 case = BeautifulSoup(r.content, 'html.parser')
                 case = get_case_specs(case)
-                serializer = CaseSerializeer(data=case)
+                serializer = CaseSerializer(data=case)
                 save_serializer(serializer)
                 cases.append(case)
 

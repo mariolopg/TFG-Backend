@@ -57,13 +57,22 @@ class LiquidCoolerSerializer(serializers.ModelSerializer):
         model = LiquidCooler
         fields = '__all__'
 
-class CaseSerializeer(serializers.ModelSerializer):
+class CaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Case
         fields = '__all__'
 
 class BuildSerializer(serializers.ModelSerializer):
-    # cpu = CPUSerializer()
+    cpu_data = CPUSerializer(read_only=True, source='cpu')
+    motherboard_data = MotherboardSerializer(read_only=True, source='motherboard')
+    ram_data = RAMSerializer(read_only=True, source='ram')
+    gpu_data = GPUSerializer(read_only=True, source='gpu')
+    air_cooler_data = AirCoolerSerializer(read_only=True, source='air_cooler')
+    liquid_cooler_data = LiquidCoolerSerializer(read_only=True, source='liquid_cooler')
+    hdd_data = HDDSerializer(read_only=True, source='hdd')
+    ssd_data = SSDSerializer(read_only=True, source='ssd')
+    psu_data = PSUSerializer(read_only=True, source='psu')
+    case_data = CaseSerializer(read_only=True, source='case')
 
     def check_sockets(self, attrs):
         errors = {}
@@ -83,7 +92,7 @@ class BuildSerializer(serializers.ModelSerializer):
         air_cooler = attrs.get('air_cooler', None)
         liquid_cooler = attrs.get('liquid_cooler', None)
 
-        if not (air_cooler and liquid_cooler):
+        if not air_cooler and not liquid_cooler:
             errors['cooler'] = _("You must select a Cooler")
         elif air_cooler and liquid_cooler:
             errors['cooler'] = _("You only can select one Cooler")
@@ -199,7 +208,10 @@ class BuildSerializer(serializers.ModelSerializer):
             errors.append(_("This Case don't have enoght 2.5\" slots"))
 
 
-        return {'case': errors}
+        if errors:
+            return {'case': errors}
+        
+        return {}
     
     def validate(self, attrs):
         errors = {}
@@ -216,3 +228,15 @@ class BuildSerializer(serializers.ModelSerializer):
     class Meta:
         model = Build
         fields = '__all__'
+        extra_kwargs = {
+            'cpu': {'write_only': True},
+            'motherboard': {'write_only': True},
+            'air_cooler': {'write_only': True},
+            'liquid_cooler': {'write_only': True},
+            'ram': {'write_only': True},
+            'gpu': {'write_only': True},
+            'psu': {'write_only': True},
+            'ssd': {'write_only': True},
+            'hdd': {'write_only': True},
+            'case': {'write_only': True},
+        }
