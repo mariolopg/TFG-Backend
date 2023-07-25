@@ -97,9 +97,9 @@ class BuildSerializer(serializers.ModelSerializer):
         elif air_cooler and liquid_cooler:
             errors['cooler'] = _("You only can select one Cooler")
         elif air_cooler and not cpu.socket in air_cooler.supported_sockets.all():
-            errors['cooler'] = _("CPU and Cooler Sockets must be the same")
+            errors['air_cooler'] = _("CPU and Cooler Sockets must be the same")
         elif liquid_cooler and not cpu.socket in liquid_cooler.supported_sockets.all():
-            errors['cooler'] = _("CPU and Cooler Sockets must be the same")
+            errors['liquid_cooler'] = _("CPU and Cooler Sockets must be the same")
 
         return errors
     

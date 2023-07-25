@@ -5,3 +5,4 @@ requests
 beautifulsoup4
 django-enumchoicefield
 django-cron
+django-cors-headers
