@@ -62,6 +62,14 @@ class CaseSerializer(serializers.ModelSerializer):
         model = Case
         fields = '__all__'
 
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = '__all__'
+        extra_kwargs = {
+            'build': {'write_only': True},
+        }
+
 class BuildSerializer(serializers.ModelSerializer):
     cpu_data = CPUSerializer(read_only=True, source='cpu')
     motherboard_data = MotherboardSerializer(read_only=True, source='motherboard')
@@ -73,6 +81,8 @@ class BuildSerializer(serializers.ModelSerializer):
     ssd_data = SSDSerializer(read_only=True, source='ssd')
     psu_data = PSUSerializer(read_only=True, source='psu')
     case_data = CaseSerializer(read_only=True, source='case')
+
+    comments = CommentSerializer(read_only=True, many=True, source='comment_set')
 
     def check_sockets(self, attrs):
         errors = {}
@@ -240,8 +250,3 @@ class BuildSerializer(serializers.ModelSerializer):
             'hdd': {'write_only': True},
             'case': {'write_only': True},
         }
-
-class CommentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Comment
-        fields = '__all__'
