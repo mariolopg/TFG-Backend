@@ -52,3 +52,7 @@ class CaseViewSet(viewsets.ModelViewSet):
 class BuildViewSet(viewsets.ModelViewSet):
     queryset = Build.objects.all()
     serializer_class = BuildSerializer
+
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer

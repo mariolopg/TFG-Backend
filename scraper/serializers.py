@@ -240,3 +240,8 @@ class BuildSerializer(serializers.ModelSerializer):
             'hdd': {'write_only': True},
             'case': {'write_only': True},
         }
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = '__all__'

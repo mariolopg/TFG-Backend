@@ -246,4 +246,15 @@ class Build(models.Model):
  
     def __str__(self):
         return self
+    
+class Comment(models.Model):
+    id = models.AutoField(primary_key = True)
+    comment = models.CharField(blank = False, max_length=10000)
+    build = models.ForeignKey('Build', on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ['id']
+ 
+    def __str__(self):
+        return self
  

@@ -30,6 +30,7 @@ router.register(r'ssd', SSDViewSet)
 router.register(r'psu', PSUViewSet)
 router.register(r'case', CaseViewSet)
 router.register(r'build', BuildViewSet)
+router.register(r'comment', CommentViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
