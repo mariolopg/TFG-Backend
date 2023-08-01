@@ -238,15 +238,3 @@ class BuildSerializer(serializers.ModelSerializer):
     class Meta:
         model = Build
         fields = '__all__'
-        extra_kwargs = {
-            'cpu': {'write_only': True},
-            'motherboard': {'write_only': True},
-            'air_cooler': {'write_only': True},
-            'liquid_cooler': {'write_only': True},
-            'ram': {'write_only': True},
-            'gpu': {'write_only': True},
-            'psu': {'write_only': True},
-            'ssd': {'write_only': True},
-            'hdd': {'write_only': True},
-            'case': {'write_only': True},
-        }
