@@ -56,3 +56,7 @@ class BuildViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+
+class BuildImageViewSet(viewsets.ModelViewSet):
+    queryset = BuildImage.objects.all()
+    serializer_class = BuildImageSerializer

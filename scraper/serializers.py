@@ -70,6 +70,14 @@ class CommentSerializer(serializers.ModelSerializer):
             'build': {'write_only': True},
         }
 
+class BuildImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BuildImage
+        fields = '__all__'
+        extra_kwargs = {
+            'build': {'write_only': True},
+        }
+
 class BuildSerializer(serializers.ModelSerializer):
     cpu_data = CPUSerializer(read_only=True, source='cpu')
     motherboard_data = MotherboardSerializer(read_only=True, source='motherboard')
@@ -83,6 +91,7 @@ class BuildSerializer(serializers.ModelSerializer):
     case_data = CaseSerializer(read_only=True, source='case')
 
     comments = CommentSerializer(read_only=True, many=True, source='comment_set')
+    images = BuildImageSerializer(read_only=True, many=True, source='buildimage_set')
 
     def check_sockets(self, attrs):
         errors = {}

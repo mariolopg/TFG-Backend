@@ -257,4 +257,15 @@ class Comment(models.Model):
  
     def __str__(self):
         return self
+    
+class BuildImage(models.Model):
+    id = models.AutoField(primary_key = True)
+    image = models.ImageField(upload_to='builds')
+    build = models.ForeignKey('Build', on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ['id']
+ 
+    def __str__(self):
+        return self
  
