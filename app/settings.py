@@ -33,16 +33,24 @@ ALLOWED_HOSTS = ['*']
 
 
 INSTALLED_APPS = [
+    "django.contrib.sites",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "rest_framework",
+    "rest_framework.authtoken",
+    "allauth",
+    "dj_rest_auth",
+    "dj_rest_auth.registration",
+    'corsheaders',
+    "allauth.account",
     "django_cron",
     'api.apps.ApiConfig',
     'scraper.apps.ScraperConfig',
-    'corsheaders',
+    "authentication.apps.AuthenticationConfig",
 ]
 
 MIDDLEWARE = [
@@ -112,6 +120,22 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
+    ]
+}
+
+# Account configuration
+REST_AUTH = {
+    'REGISTER_SERIALIZER': 'authentication.serializers.CustomRegistrationSerializer'
+}
+
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_AUTHENTICATION_METHOD = "username"
+
 CRON_CLASSES = [
     "cron.cron.AutoScrap"
 ]
@@ -127,6 +151,7 @@ USE_I18N = True
 
 USE_TZ = True
 
+SIDE_ID = 1
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/

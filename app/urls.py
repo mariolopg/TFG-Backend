@@ -38,5 +38,6 @@ router.register(r'build_image', BuildImageViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/scrap/<component>', scrap),
+    path('api/auth/', include('authentication.urls')),
     path('api/', include(router.urls))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

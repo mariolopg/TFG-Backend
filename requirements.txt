@@ -7,3 +7,5 @@ django-enumchoicefield
 django-cron
 django-cors-headers
 Pillow
+django-allauth
+dj-rest-auth[with_social]
