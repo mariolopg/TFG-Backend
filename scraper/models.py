@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import *
+from django.contrib.auth.models import User
 # Create your models here.
     
 class Socket(models.Model):
@@ -240,6 +241,7 @@ class Build(models.Model):
     ssd = models.ForeignKey('SSD', null=True, on_delete=models.CASCADE)
     case = models.ForeignKey('Case', on_delete=models.CASCADE)
     psu = models.ForeignKey('PSU', on_delete=models.CASCADE)
+    builder = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
         ordering = ['id']
@@ -251,6 +253,7 @@ class Comment(models.Model):
     id = models.AutoField(primary_key = True)
     comment = models.CharField(blank = False, max_length=10000)
     build = models.ForeignKey('Build', on_delete=models.CASCADE)
+    builder = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
         ordering = ['id']

@@ -8,4 +8,5 @@ django-cron
 django-cors-headers
 Pillow
 django-allauth
-dj-rest-auth[with_social]
+dj-rest-auth
+django-cleanup

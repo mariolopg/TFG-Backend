@@ -1,9 +1,7 @@
-import sys
-
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from dj_rest_auth.serializers import UserDetailsSerializer
 from django.utils.translation import gettext as _
-
 
 from .models import *
  
@@ -63,6 +61,7 @@ class CaseSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class CommentSerializer(serializers.ModelSerializer):
+    builder_data = UserDetailsSerializer(read_only=True, source='builder')
     class Meta:
         model = Comment
         fields = '__all__'
@@ -71,6 +70,16 @@ class CommentSerializer(serializers.ModelSerializer):
         }
 
 class BuildImageSerializer(serializers.ModelSerializer):
+    def create(self, validated_data):
+        user = self.context['request'].user
+
+        if user == validated_data.get('build').builder:
+            image = BuildImage(**validated_data)
+            image.save()
+            return image
+        else:
+            raise serializers.ValidationError(_("You do not have permission to perform this action."))
+
     class Meta:
         model = BuildImage
         fields = '__all__'
@@ -92,6 +101,7 @@ class BuildSerializer(serializers.ModelSerializer):
 
     comments = CommentSerializer(read_only=True, many=True, source='comment_set')
     images = BuildImageSerializer(read_only=True, many=True, source='buildimage_set')
+    builder_data = UserDetailsSerializer(read_only=True, source='builder')
 
     def check_sockets(self, attrs):
         errors = {}
