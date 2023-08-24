@@ -1,3 +1,4 @@
+import json
 from rest_framework.views import APIView
 from rest_framework import status, viewsets
 from dj_rest_auth.registration.views import RegisterView
@@ -8,6 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import get_user_model
 from .permissions import ReadOnly
 from .serializers import CustomUserSerializer, CustomRegistrationSerializer
+from scraper.models import Build, Comment
 
 User = get_user_model()
 class CustomRegistrationView(RegisterView):
@@ -17,11 +19,13 @@ class CustomLoginView(LoginView):
   def get_response(self):
     serializer = TokenSerializer(instance=self.token, context={'request': self.request})
     user = self.user
-    user_serializer = UserDetailsSerializer(user)
+    user_data = UserDetailsSerializer(user).data
+    user_data['is_admin'] = user.is_staff
+    user_data['date_joined'] = user.date_joined
 
     response = {
         'token': serializer.data.get('key'),
-        'user': user_serializer.data
+        'user': user_data
     }
 
     return Response(response, status=status.HTTP_200_OK)
@@ -33,6 +37,10 @@ class DeactivateAccount(APIView):
     user = self.request.user
     user.is_active = False
     user.save()
+
+    Build.objects.filter(builder=user).delete()
+    Comment.objects.filter(builder=user).delete()
+
     return Response({"data": "user deactivated"}, status=status.HTTP_200_OK)
     
 class UserViewSet(viewsets.ModelViewSet):

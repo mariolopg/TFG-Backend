@@ -68,9 +68,9 @@ class BuildViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.filter(builder__is_active=True)
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticatedCreateOnly, IsOwnerOrReadOnly]
+    permission_classes = [IsAuthenticatedCreateOnly]
 
 class BuildImageViewSet(viewsets.ModelViewSet):
     queryset = BuildImage.objects.all()
     serializer_class = BuildImageSerializer
-    permission_classes = [IsAuthenticatedCreateOnly, IsBuildOwnerOrReadOnly]
+    permission_classes = [IsBuildOwnerOrReadOnly]

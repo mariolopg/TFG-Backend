@@ -70,16 +70,6 @@ class CommentSerializer(serializers.ModelSerializer):
         }
 
 class BuildImageSerializer(serializers.ModelSerializer):
-    def create(self, validated_data):
-        user = self.context['request'].user
-
-        if user == validated_data.get('build').builder:
-            image = BuildImage(**validated_data)
-            image.save()
-            return image
-        else:
-            raise serializers.ValidationError(_("You do not have permission to perform this action."))
-
     class Meta:
         model = BuildImage
         fields = '__all__'
