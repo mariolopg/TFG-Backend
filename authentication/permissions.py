@@ -1,6 +1,8 @@
 from rest_framework import permissions
+from django.contrib.auth import get_user_model
 from scraper.models import Build, BuildImage
 
+User = get_user_model()
 class ReadOnly(permissions.BasePermission):
   def has_permission(self, request, view):
     return request.method in permissions.SAFE_METHODS
@@ -8,7 +10,8 @@ class ReadOnly(permissions.BasePermission):
 class IsAuthenticatedCreateOnly(permissions.BasePermission):
   def has_permission(self, request, view):
     if request.method in ['POST', 'PUT', 'PATCH', 'DELETE']:
-      return request.user.is_authenticated
+      builder = User.objects.get(id=request.data['builder'])
+      return request.user.is_authenticated and request.user == builder
     
     return True 
 
