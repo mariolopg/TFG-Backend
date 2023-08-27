@@ -100,7 +100,7 @@ class BuildSerializer(serializers.ModelSerializer):
         motherboard = attrs.get('motherboard')
 
         if cpu.socket != motherboard.socket:
-            errors['motherboard'] = _("CPU and Motherboard Sockets must be the same")
+            errors['motherboard'] = _("CPU, with socket {}, and Motherboard, with socket {}, must use the same socket.").format(cpu.socket, motherboard.socket)
 
         return errors
     
@@ -112,13 +112,15 @@ class BuildSerializer(serializers.ModelSerializer):
         liquid_cooler = attrs.get('liquid_cooler', None)
 
         if not air_cooler and not liquid_cooler:
-            errors['cooler'] = _("You must select a Cooler")
+            errors['cooler'] = _("You must select a Cooler.")
         elif air_cooler and liquid_cooler:
-            errors['cooler'] = _("You only can select one Cooler")
+            errors['cooler'] = _("You only can select one Cooler.")
         elif air_cooler and not cpu.socket in air_cooler.supported_sockets.all():
-            errors['air_cooler'] = _("CPU and Cooler Sockets must be the same")
+            supported_sockets = [str(item) for item in air_cooler.supported_sockets.all()]
+            errors['air_cooler'] = _("CPU, with socket {}, and Cooler, with socket {}, must use the same socket.").format(cpu.socket, supported_sockets)
         elif liquid_cooler and not cpu.socket in liquid_cooler.supported_sockets.all():
-            errors['liquid_cooler'] = _("CPU and Cooler Sockets must be the same")
+            supported_sockets = [str(item) for item in liquid_cooler.supported_sockets.all()]
+            errors['liquid_cooler'] = _("CPU, with socket {}, and Cooler, with socket {}, must use the same socket.").format(cpu.socket, supported_sockets)
 
         return errors
     
@@ -129,11 +131,11 @@ class BuildSerializer(serializers.ModelSerializer):
         ram = attrs.get('ram')
 
         if motherboard.memory_type != ram.type:
-            errors['ram'] =  _("Motherboard and RAM must have the same RAM type")
+            errors['ram'] =  _("Motherboard, with RAM type {}, and RAM, with type {}, must use the same RAM type.").format(motherboard.memory_type, ram.type)
         elif motherboard.ram_slots < ram.units:
-            errors['ram'] =  _("There are more modules on this RAM pack than the availables on the Motherboard")
+            errors['ram'] =  _("There are more modules on this RAM pack, {}, than the availables on the Motherboard, {}.").format(motherboard.ram_slots, ram.units)
         elif motherboard.ram_capacity < ram.size:
-            errors['ram'] =  _("The maximun RAM size on this Motherboard is smaller than the RAM size of this RAM pack")
+            errors['ram'] =  _("The maximun RAM size on this Motherboard, {} GB, is smaller than the RAM size of this RAM pack, {} GB.").format(motherboard.ram_capacity, ram.size)
 
         return errors
     
@@ -144,7 +146,7 @@ class BuildSerializer(serializers.ModelSerializer):
         gpu = attrs.get('gpu', None)
 
         if not gpu and not cpu.integrated_graphics:
-            errors['gpu'] = _("You must select a Graphics Card because CPU doesn't have integrated graphics")
+            errors['gpu'] = _("You must select a Graphics Card because CPU doesn't have integrated graphics.")
 
         return errors
     
@@ -156,20 +158,20 @@ class BuildSerializer(serializers.ModelSerializer):
         ssd = attrs.get('ssd', None)
 
         if not (hdd or ssd):
-            errors['storage_drive'] = _("You must select at least one Storage Drive Unit")
+            errors['storage_drive'] = _("You must select at least one Storage Drive Unit.")
         else:
             if hdd and ssd:
                 if ssd.form_factor == '2.5' and motherboard.sata_slots < 2:
-                    errors['storage_drive'] = _("These HDD and SSD not compatible because there aren't enoght SATA ports on this Motherboard")
+                    errors['storage_drive'] = _("These HDD and SSD not compatible because there aren't enoght SATA ports on this Motherboard, {} SATA ports.").format(motherboard.sata_slots)
             elif hdd and motherboard.sata_slots == 0:
-                errors['hdd'] = _("This HDD is not compatible because there isn't any SATA ports on this Motherboard")
+                errors['hdd'] = _("This HDD is not compatible because there isn't any SATA ports on this Motherboard.")
             elif ssd:
                 form_factor = ssd.form_factor
                 m2_slots = motherboard.m2_3_slots + motherboard.m2_3_slots
                 if form_factor == 'M.2' and m2_slots == 0:
-                    errors['ssd'] = _("This SSD is not compatible because there aren't any M.2 ports on this Motherboard")
+                    errors['ssd'] = _("This SSD is not compatible because there aren't any M.2 ports on this Motherboard.")
                 elif form_factor == '2.5' and motherboard.sata_slots == 0:
-                    errors['ssd'] = _("This SSD is not compatible because there aren't any SATA ports on this Motherboard")
+                    errors['ssd'] = _("This SSD is not compatible because there aren't any SATA ports on this Motherboard.")
     
         return errors
     
@@ -197,19 +199,19 @@ class BuildSerializer(serializers.ModelSerializer):
         psu = attrs.get('psu', None)
 
         if not motherboard.form_factor in case_motherboard_compatibility[case.motherboard_size]:
-            errors.append(_("This Case is very small for the selected Motherboard"))
+            errors.append(_("This Case, supports up to {} motherboards, is very small for the selected Motherboard, {}.").format(case.motherboard_size, motherboard.form_factor))
 
         if gpu and gpu.length > case.gpu_length:
-            errors.append( _("This Case is very small for the selected Graphics Card"))
+            errors.append( _("This Case, supports Graphics Cards up to {} mm, is very small for the selected Graphics Card, {} mm.").format(case.gpu_length, gpu.length))
 
         if air_cooler and air_cooler.height > case.air_cooler_height:
-            errors.append(_("This Case is very small for the selected Air Cooler"))
+            errors.append(_("This Case, supports air coolers up to {} mm is very small for the selected Air Cooler, {} mm.").format(case.air_cooler_height, air_cooler.height))
 
         if liquid_cooler and getattr(case, f"_{liquid_cooler.radiator}_radiator_support") == 0:
-            errors.append(_("This Case is not compatible with the radiator of the selected Liquid Cooler"))
+            errors.append(_("This Case is not compatible with the radiator of the selected Liquid Cooler, {} mm.").format(liquid_cooler.radiator))
 
         if psu.form_factor != case.psu_size:
-            errors.append( _("This Case is not compatible with the form factor of the selected PSU"))
+            errors.append( _("This Case, {} PSU supported, is not compatible with the form factor of the selected PSU, {}.").format(case.psu_size, psu.form_factor))
 
 
         _2_5_slots_to_check = 0
@@ -217,14 +219,14 @@ class BuildSerializer(serializers.ModelSerializer):
             if hdd.form_factor == '2.5':
                 _2_5_slots_to_check = 1
             elif case._3_5_disk_slot == 0:
-                errors.append(_("This Case don't have any 3.5\" slot"))
+                errors.append(_("This Case don't have any 3.5\" slot."))
 
         if ssd:
             if ssd.form_factor == '2.5':
                 _2_5_slots_to_check += 1
 
         if _2_5_slots_to_check > 0 and case._2_5_disk_slot < _2_5_slots_to_check:
-            errors.append(_("This Case don't have enoght 2.5\" slots"))
+            errors.append(_("This Case don't have enoght 2.5\" slots."))
 
 
         if errors:
