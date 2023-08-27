@@ -6,6 +6,7 @@ from dj_rest_auth.views import LoginView
 from dj_rest_auth.serializers import TokenSerializer, UserDetailsSerializer
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django.utils.translation import gettext as _
 from django.contrib.auth import get_user_model
 from .permissions import ReadOnly
 from .serializers import CustomUserSerializer, CustomRegistrationSerializer
@@ -41,7 +42,7 @@ class DeactivateAccount(APIView):
     Build.objects.filter(builder=user).delete()
     Comment.objects.filter(builder=user).delete()
 
-    return Response({"data": "user deactivated"}, status=status.HTTP_200_OK)
+    return Response({"data": _("User was succesfully deactivated.")}, status=status.HTTP_200_OK)
     
 class UserViewSet(viewsets.ModelViewSet):
   queryset = User.objects.filter(is_active=True)
