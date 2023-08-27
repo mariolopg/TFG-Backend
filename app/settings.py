@@ -142,7 +142,7 @@ ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_AUTHENTICATION_METHOD = 'username'
 
 CRON_CLASSES = [
-    'cron.cron.AutoScrap'
+    'scraper.cron.AutoScrap'
 ]
 
 # Internationalization
