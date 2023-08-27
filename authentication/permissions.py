@@ -9,7 +9,7 @@ class ReadOnly(permissions.BasePermission):
   
 class IsAuthenticatedCreateOnly(permissions.BasePermission):
   def has_permission(self, request, view):
-    if request.method in ['POST', 'PUT', 'PATCH', 'DELETE']:
+    if request.method in ['POST']:
       builder = User.objects.get(id=request.data['builder'])
       return request.user.is_authenticated and request.user == builder
     
