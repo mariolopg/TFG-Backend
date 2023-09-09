@@ -167,7 +167,7 @@ class BuildSerializer(serializers.ModelSerializer):
                 errors['hdd'] = _("This HDD is not compatible because there isn't any SATA ports on this Motherboard.")
             elif ssd:
                 form_factor = ssd.form_factor
-                m2_slots = motherboard.m2_3_slots + motherboard.m2_3_slots
+                m2_slots = motherboard.m2_3_slots + motherboard.m2_4_slots
                 if form_factor == 'M.2' and m2_slots == 0:
                     errors['ssd'] = _("This SSD is not compatible because there aren't any M.2 ports on this Motherboard.")
                 elif form_factor == '2.5' and motherboard.sata_slots == 0:

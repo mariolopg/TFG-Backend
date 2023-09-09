@@ -17,7 +17,7 @@ class Chipset(models.Model):
         ordering = ['id']
  
     def __str__(self):
-        return self
+        return self.id
     
 class RAMType(models.Model):
     id = models.CharField(primary_key = True, max_length=50)
@@ -25,7 +25,7 @@ class RAMType(models.Model):
         ordering = ['id']
  
     def __str__(self):
-        return self
+        return self.id
     
 class CPU(models.Model):
     id = models.AutoField(primary_key = True)
